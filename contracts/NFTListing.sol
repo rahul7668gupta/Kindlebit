@@ -25,14 +25,14 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract NFTListingContract is Operator {
+contract NFTListing is Operator {
     // Callback values from zepellin ERC721Receiver.sol
     // Old ver: bytes4(keccak256("onERC721Received(address,uint256,bytes)")) = 0xf0b9e5ba;
     bytes4 constant ERC721_RECEIVED_OLD = 0xf0b9e5ba;
     // New ver w/ operator: bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")) = 0xf0b9e5ba;
     bytes4 constant ERC721_RECEIVED = 0x150b7a02;
 
-    Whitelist public NFTListing =
+    Whitelist public whitelist =
         Whitelist(0xA8CedD578fed14f07C3737bF42AD6f04FAAE3978); // Main Net
     ListingFeeProvider public FeeProvider =
         ListingFeeProvider(0x58D36571250D91eF5CE90869E66Cd553785364a2); // Main Net
@@ -95,7 +95,7 @@ contract NFTListingContract is Operator {
 
     modifier onlyWhitelisted(address _contract) {
         require(
-            NFTListing.isWhitelisted(_contract),
+            whitelist.isWhitelisted(_contract),
             "Contract not in whitelist."
         );
         _;
@@ -200,7 +200,7 @@ contract NFTListingContract is Operator {
 
     function updateWhitelist(address _newAddr) public onlyOperator {
         require(_newAddr != address(0), "Invalid contract address.");
-        NFTListing = Whitelist(_newAddr);
+        whitelist = Whitelist(_newAddr);
     }
 
     function updateExpiry(uint256 _days) public onlyOperator {
