@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "./Operator.sol";
 import "./Whitelist.sol";
 import "./ListingFeeProvider.sol";
-import "openzeppelin-contracts/token/ERC721/ERC721.sol";
+import "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 // @title ERC-721 Non-Fungible Token Standard
@@ -177,9 +177,8 @@ contract NFTListingContract is Operator {
 
         require(seller == msg.sender, "Only seller can withdraw listing.");
 
-        ERC721 nftToken = ERC721(_contract);
-
-        ERC721(_contract).safeTransferFrom(this, seller, _tokenId);
+        IERC721 nftToken = IERC721(_contract);
+        nftToken.transferFrom(address(this), seller, _tokenId);
 
         emit LogItemWithdrawn(seller, _contract, _tokenId, block.timestamp);
 
@@ -278,7 +277,7 @@ contract NFTListingContract is Operator {
         require(_price > 0 && _price == listings[key].price, "Invalid price.");
         require(listings[key].expiry > block.timestamp, "Item expired.");
 
-        ERC721 nftToken = ERC721(_token);
+        IERC721 nftToken = IERC721(_token);
         require(
             nftToken.ownerOf(_tokenId) == address(this),
             "Item is not available."
@@ -292,7 +291,7 @@ contract NFTListingContract is Operator {
             );
         }
 
-        // nftToken.safeTransferFrom(this, _buyer, _tokenId);
+        nftToken.transferFrom(address(this), _buyer, _tokenId);
 
         uint256 fee;
         (, fee) = getFee(_price, currencyAddress, _buyer, seller, _token); // getFee returns percentFee and fee, we only need fee
